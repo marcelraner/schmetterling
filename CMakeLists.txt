@@ -4,7 +4,11 @@ project(Sample)
 
 add_executable(Sample
     src/main.cpp
+    src/window.cpp
     src/application.cpp
+    src/eventhandler.cpp
+    src/subsysteminitializer.cpp
+    src/inputhandler.cpp
 )
 
 target_include_directories(Sample PUBLIC
