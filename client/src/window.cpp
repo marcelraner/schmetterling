@@ -60,3 +60,9 @@ void Window::draw_rectangle(int32_t x, int32_t y, int32_t h, int32_t w)
     SDL_SetRenderDrawColor(this->sdl_renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderFillRect(this->sdl_renderer, &rect);
 }
+
+void Window::draw_line(int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+{
+    SDL_SetRenderDrawColor(this->sdl_renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
+    SDL_RenderDrawLine(this->sdl_renderer, x1, y1, x2, y2);
+}
