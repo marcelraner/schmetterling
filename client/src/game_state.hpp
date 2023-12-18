@@ -10,6 +10,7 @@ class GameState
 {
 public:
     GameState() {};
+    Position camera_position; // maybe replace with reference
     std::map<uint32_t, RigidBody> rigid_bodies;
 };
 

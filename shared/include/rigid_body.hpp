@@ -1,10 +1,8 @@
 #ifndef RIGID_BODY_HPP_
 #define RIGID_BODY_HPP_
 
-#include "vector2.hpp"
-
-using Position = Vector2<float>;
-using Velocity = Vector2<float>;
+#include <position.hpp>
+#include <velocity.hpp>
 
 typedef struct
 {

@@ -21,3 +21,20 @@ target_link_libraries(shared PUBLIC
     SDL2
     SDL2_net
 )
+
+add_executable(shared_test
+    test/test_circular_buffer.cpp
+)
+
+target_include_directories(shared_test PUBLIC
+    include
+)
+
+target_link_libraries(shared_test
+    GTest::gtest_main
+)
+
+add_test(
+    NAME shared_test
+    COMMAND $<TARGET_FILE:shared_test>
+)

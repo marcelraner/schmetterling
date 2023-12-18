@@ -6,6 +6,7 @@
 #include <window.hpp>
 #include <client_application.hpp>
 #include <renderer.hpp>
+#include <camera.hpp>
 
 int main()
 {
@@ -16,9 +17,10 @@ int main()
     Window window;
     PhysicsSimulator physics_simulator;
     GameState game_state;
-    Renderer renderer(window);
-    ClientApplication app(event_handler, input_handler, window, physics_simulator, game_state, renderer);
-
+    Camera camera;
+    Renderer renderer(window, camera);
+    ClientApplication app(event_handler, input_handler, window, physics_simulator, game_state, renderer, camera);
+    
     try
     {
         app.create_dummy_data();

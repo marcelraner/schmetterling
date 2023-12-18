@@ -22,4 +22,8 @@ void EventHandler::handleEvents()
             break;
         }
     }
+
+    /*CircularBuffer<int> circular_buffer(3);
+
+    circular_buffer.push(0);*/
 }

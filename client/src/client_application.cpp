@@ -80,6 +80,7 @@ void ClientApplication::update_state(std::chrono::nanoseconds dt)
     //Logger::trace("ClientApplication::update_state()");
     this->event_handler.handleEvents();
     this->physics_simulator.update_rigid_bodies(this->game_state.rigid_bodies, dt);
+    this->camera.camera_position = this->game_state.rigid_bodies.at(2).position;
 }
 
 void ClientApplication::sync_with_server()
@@ -93,6 +94,8 @@ void ClientApplication::render()
 {
     //Logger::trace("ClientApplication::render()");
     this->renderer.clear();
+    this->renderer.render_grid();
+    this->renderer.render_camera();
     this->renderer.render_rigid_bodies(this->game_state.rigid_bodies);
     this->renderer.present();
 }
@@ -124,4 +127,6 @@ void ClientApplication::create_dummy_data()
     rigid_body.position.x = 200;
     rigid_body.position.y = 200;
     this->game_state.rigid_bodies.insert({2, rigid_body});
+
+    this->camera.camera_position = rigid_body.position;
 }

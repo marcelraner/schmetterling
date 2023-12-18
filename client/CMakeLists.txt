@@ -31,14 +31,3 @@ target_link_libraries(client PUBLIC
     SDL2
     SDL2_net
 )
-
-enable_testing()
-
-add_executable(test_a
-    test/test_a.cpp
-)
-target_link_libraries(test_a
-    GTest::gtest_main
-)
-add_test(NAME test_a
-         COMMAND test_a)

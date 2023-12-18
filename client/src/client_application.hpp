@@ -7,6 +7,7 @@
 #include <physics_simulator.hpp>
 #include <game_state.hpp>
 #include <renderer.hpp>
+#include <camera.hpp>
 
 class ClientApplication
 {
@@ -16,14 +17,16 @@ public:
                       Window& window,
                       PhysicsSimulator& physics_simulator,
                       GameState& game_state,
-                      Renderer& renderer)
+                      Renderer& renderer,
+                      Camera& camera)
                       :
                       event_handler{event_handler},
                       input_handler{input_handler},
                       window{window},
                       physics_simulator{physics_simulator},
                       game_state{game_state},
-                      renderer{renderer}
+                      renderer{renderer},
+                      camera{camera}
     {
         this->event_handler.registerOnQuitCallback(std::bind(&ClientApplication::quit, this));
     };
@@ -43,6 +46,7 @@ private:
     GameState& game_state;
     Window& window;
     Renderer& renderer;
+    Camera& camera;
 };
 
 #endif // CLIENT_APPLICATION_HPP_

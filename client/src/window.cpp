@@ -54,6 +54,13 @@ void Window::present()
     SDL_RenderPresent(this->sdl_renderer);
 }
 
+Size2<int32_t> Window::get_size()
+{
+    Size2<int> size;
+    SDL_GetWindowSize(this->sdl_window, &size.width, &size.height);
+    return size;
+}
+
 void Window::draw_rectangle(int32_t x, int32_t y, int32_t h, int32_t w)
 {
     SDL_Rect rect = {x, y, w, h};

@@ -4,21 +4,41 @@
 
 void InputHandler::handleInput()
 {
+    // handle hold keys
     auto currentKeyStates = SDL_GetKeyboardState( NULL );
-    if( currentKeyStates[ SDL_SCANCODE_UP ] )
+    if( currentKeyStates[ SDL_SCANCODE_W ] )
     {
-        std::cout << "DEBUG: Key UP is pressed" << std::endl;
+        // start accelerating up
     }
-    else if( currentKeyStates[ SDL_SCANCODE_DOWN ] )
+    else
     {
-        std::cout << "DEBUG: Key DOWN is pressed" << std::endl;
+        // stop accelerating up
     }
-    else if( currentKeyStates[ SDL_SCANCODE_LEFT ] )
+
+    if( currentKeyStates[ SDL_SCANCODE_A ] )
     {
-        std::cout << "DEBUG: Key LEFT is pressed" << std::endl;
+        // start accelerating left
     }
-    else if( currentKeyStates[ SDL_SCANCODE_RIGHT ] )
+    else
     {
-        std::cout << "DEBUG: Key RIGHT is pressed" << std::endl;
+        // stop accelerating left
+    }
+
+    if( currentKeyStates[ SDL_SCANCODE_S ] )
+    {
+        // start accelerating down
+    }
+    else
+    {
+        // stop accelerating down
+    }
+
+    if( currentKeyStates[ SDL_SCANCODE_D ] )
+    {
+        // start accelerating right
+    }
+    else
+    {
+        // stop accelerating right
     }
 }
