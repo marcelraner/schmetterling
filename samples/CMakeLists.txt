@@ -1,0 +1,1 @@
+add_subdirectory(wait_for_events_sample)

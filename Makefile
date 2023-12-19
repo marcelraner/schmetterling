@@ -28,3 +28,9 @@ run_client:
 	cp ./extern/SDL2-2.28.5/x86_64-w64-mingw32/bin/SDL2.dll ./build/debug/client
 	cp ./extern/SDL2_net-2.2.0/x86_64-w64-mingw32/bin/SDL2_net.dll ./build/debug/client
 	./build/debug/client/client
+
+.PHONY: run_wait_for_events_sample
+run_wait_for_events_sample:
+	cp ./extern/SDL2-2.28.5/x86_64-w64-mingw32/bin/SDL2.dll ./build/debug/samples/wait_for_events_sample
+	cp ./extern/SDL2_net-2.2.0/x86_64-w64-mingw32/bin/SDL2_net.dll ./build/debug/samples/wait_for_events_sample
+	./build/debug/samples/wait_for_events_sample/wait_for_events_sample
