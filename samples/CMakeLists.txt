@@ -1,1 +1,2 @@
 add_subdirectory(wait_for_events_sample)
+add_subdirectory(event_trigger_listener_threads)
