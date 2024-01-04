@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "client",
+    "server",
+    "shared",
+    "sdl2_wrapper",
+    "examples_crate",
+]
+
+resolver = "2"
