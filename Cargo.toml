@@ -6,6 +6,8 @@ members = [
     "shared",
     "sdl2_wrapper",
     "examples_crate",
+    "sdl2_ffi",
+    "sdl2_ttf_ffi",
 ]
 
 resolver = "2"

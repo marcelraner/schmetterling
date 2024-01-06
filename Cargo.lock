@@ -13,12 +13,31 @@ dependencies = [
 name = "examples_crate"
 version = "0.1.0"
 dependencies = [
+ "sdl2_ffi",
+ "sdl2_image_ffi",
+ "sdl2_ttf_ffi",
  "sdl2_wrapper",
 ]
 
 [[package]]
+name = "sdl2_ffi"
+version = "0.1.0"
+
+[[package]]
+name = "sdl2_image_ffi"
+version = "0.1.0"
+
+[[package]]
+name = "sdl2_ttf_ffi"
+version = "0.1.0"
+
+[[package]]
 name = "sdl2_wrapper"
 version = "0.1.0"
+dependencies = [
+ "sdl2_ffi",
+ "sdl2_ttf_ffi",
+]
 
 [[package]]
 name = "server"

@@ -1,12 +1,17 @@
 use std::thread;
 
-use sdl2_wrapper::{SDL_Init, SDL_INIT_VIDEO, SDL_EVENT_QUIT, get_error, SDL_Quit, SDL_CreateWindow, SDL_WINDOW_SHOWN, SDL_Event, SDL_WaitEvent, SDL_WINDOW_RESIZABLE, SDL_PushEvent, SDL_RegisterEvents};
+use sdl2_ffi::{
+    SDL_CreateWindow, SDL_Event, SDL_Init, SDL_PushEvent, SDL_Quit, SDL_RegisterEvents,
+    SDL_WaitEvent, SDL_QUIT, SDL_INIT_VIDEO, SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN,
+};
+
+use sdl2_wrapper::sdl2_get_error;
 
 fn main() {
     // Initialize SDL
     unsafe {
-        if SDL_Init(SDL_INIT_VIDEO as i32) != 0 {
-            panic!("Unable to initialize SDL: {}", get_error());
+        if SDL_Init(SDL_INIT_VIDEO) != 0 {
+            panic!("Unable to initialize SDL: {}", sdl2_get_error());
         }
     }
 
@@ -26,7 +31,7 @@ fn main() {
     // Check if the window was created successfully
     if window.is_null() {
         unsafe {
-            println!("Unable to create SDL window: {}", get_error());
+            println!("Unable to create SDL window: {}", sdl2_get_error());
             SDL_Quit();
         }
         return;
@@ -50,7 +55,7 @@ fn main() {
 
             // Trigger a custom render event in the main thread
             let mut render_event: SDL_Event = unsafe { std::mem::zeroed() };
-            render_event._type = render_event_type;
+            render_event.event_type = render_event_type;
 
             // Send the custom render event to the main thread
             unsafe {
@@ -73,7 +78,7 @@ fn main() {
 
             // Trigger a custom update event in the main thread
             let mut update_event: SDL_Event = unsafe { std::mem::zeroed() };
-            update_event._type = update_event_type;
+            update_event.event_type = update_event_type;
 
             // Send the custom update event to the main thread
             unsafe {
@@ -92,17 +97,17 @@ fn main() {
         }
 
         // Handle the event
-        match event._type {
-            SDL_EVENT_QUIT => {
+        match event.event_type {
+            SDL_QUIT => {
                 println!("SDL_QUIT event received, exiting...");
                 break 'event_loop;
             }
             _ => {
                 // Handle other events as needed
-                println!("{:?}", event._type);
-                if event._type == render_event_type {
+                println!("{:?}", event.event_type);
+                if event.event_type == render_event_type {
                     println!("render_event_type");
-                } else if event._type == update_event_type {
+                } else if event.event_type == update_event_type {
                     println!("update_event_type");
                 }
             }
