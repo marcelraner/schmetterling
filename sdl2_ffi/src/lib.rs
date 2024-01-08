@@ -69,7 +69,7 @@ extern "C" {
     pub fn SDL_RenderClear(renderer: SDL_Renderer) -> std::ffi::c_int;
     pub fn SDL_RenderPresent(renderer: SDL_Renderer);
     pub fn SDL_WaitEvent(event: *mut SDL_Event) -> std::ffi::c_int;
-    //pub fn SDL_RenderDrawRect(renderer: SDL_Renderer, rect: *const SDL_Rect) -> std::ffi::c_int;
+    pub fn SDL_PollEvent(event: *mut SDL_Event) -> std::ffi::c_int;
     pub fn SDL_RenderCopy(
         renderer: SDL_Renderer,
         texture: SDL_Texture,
@@ -90,7 +90,7 @@ extern "C" {
     ) -> i32;
     pub fn SDL_DestroyTexture(texture: SDL_Texture);
     pub fn SDL_RegisterEvents(numevents: i32) -> u32;
-    pub fn SDL_PushEvent(event: *mut SDL_Event) -> i32;
+    pub fn SDL_PushEvent(event: *const SDL_Event) -> i32;
     pub fn SDL_RenderDrawLine(
         renderer: SDL_Renderer,
         x1: i32,
