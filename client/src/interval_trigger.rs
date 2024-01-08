@@ -2,18 +2,18 @@ use std::{sync::{Arc, Mutex}, time::Duration, thread::{JoinHandle, self}};
 
 use sdl2_wrapper::{SdlInstance, CustomEvent};
 
-pub struct UpdateTrigger {
-    sdl_instance: Arc<Mutex<SdlInstance>>,
+pub struct IntervalTrigger {
+    _sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>,
     update_interval: Duration,
     sdl_event_id: u32,
     join_handle: Option<JoinHandle<()>>,
     stop_flag: Arc<Mutex<bool>>,
 }
 
-impl UpdateTrigger {
-    pub fn new(sdl_instance: Arc<Mutex<SdlInstance>>, update_interval: Duration, sdl_event_id: u32) -> UpdateTrigger {
-        UpdateTrigger {
-            sdl_instance,
+impl IntervalTrigger {
+    pub fn new(sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>, update_interval: Duration, sdl_event_id: u32) -> IntervalTrigger {
+        IntervalTrigger {
+            _sdl_instance: sdl_instance,
             update_interval,
             sdl_event_id,
             join_handle: None,
@@ -26,7 +26,6 @@ impl UpdateTrigger {
         let stop_flag = Arc::clone(&self.stop_flag);
         let update_interval = self.update_interval;
         let event_id = self.sdl_event_id;
-        let sdl_instance = std::sync::Arc::clone(&self.sdl_instance);
         let join_handle = std::thread::spawn(move || {
             'thread_loop: loop {
                 // check for shutdown
@@ -39,7 +38,7 @@ impl UpdateTrigger {
 
                 // Trigger a custom update event in the main thread
                 let event = CustomEvent { event_id };
-                sdl_instance.lock().unwrap().push_custom_event(event);
+                SdlInstance::push_custom_event(event);
             }
         });
         self.join_handle = Some(join_handle);

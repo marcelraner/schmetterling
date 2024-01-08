@@ -1,11 +1,13 @@
-use sdl2_ffi::{SDL_Quit, SDL_Init, SDL_INIT_VIDEO, SDL_CreateWindow, SDL_DestroyWindow, SDL_Window, SDL_WINDOW_SHOWN, SDL_WINDOW_RESIZABLE, SDL_CreateRenderer, SDL_DestroyRenderer, SDL_Renderer, SDL_RegisterEvents, SDL_PushEvent, SDL_Event};
+use sdl2_ffi::{SDL_Quit, SDL_Init, SDL_INIT_VIDEO, SDL_CreateWindow, SDL_DestroyWindow, SDL_Window, SDL_WINDOW_SHOWN, SDL_WINDOW_RESIZABLE, SDL_CreateRenderer, SDL_DestroyRenderer, SDL_Renderer, SDL_RegisterEvents, SDL_PushEvent, SDL_Event, SDL_WaitEvent, SDL_QUIT};
 
+#[derive(Debug)]
 pub enum Event {
-    Quit {
-        timestamp: u32,
-    },
+    Quit,
+    CustomEvent(CustomEvent),
+    Unknown,
 }
 
+#[derive(Debug)]
 pub struct CustomEvent {
     pub event_id: u32,
 }
@@ -18,7 +20,9 @@ pub fn sdl2_get_error() -> String {
     }
 }
 
-pub struct SdlInstance {}
+pub struct SdlInstance {
+    registered_events: Vec<u32>
+}
 
 impl SdlInstance {
     pub fn new() -> SdlInstance {
@@ -27,26 +31,47 @@ impl SdlInstance {
                 panic!("Unable to initialize SDL: {}", sdl2_get_error());
             }
         }
-        SdlInstance {}
+        SdlInstance {
+            registered_events: Vec::new(),
+        }
     }
 
-    pub fn register_events(&self, number_of_events: u32) -> Vec<u32> {
+    pub fn register_events(&mut self, number_of_events: u32) -> Vec<u32> {
         let first_event_id = unsafe {
             SDL_RegisterEvents(number_of_events as i32)
         };
-        let mut vec = Vec::new();
         for i in 0..number_of_events {
-            vec.push(first_event_id + i);
+            self.registered_events.push(first_event_id + i);
         }
-        vec
+        self.registered_events.clone()
     }
 
-    pub fn push_custom_event(&self, event: CustomEvent) {
+    // its a static method because it is called from threads
+    pub fn push_custom_event(event: CustomEvent) {
         let mut sdl_event: SDL_Event = unsafe { std::mem::zeroed() };
         sdl_event.event_type = event.event_id;
         unsafe {    
             SDL_PushEvent(&sdl_event as *const SDL_Event);
         }
+    }
+
+    pub fn wait_for_event(&self) -> Event {
+        let mut event = Event::Unknown;
+        unsafe {
+            let mut sdl_event: SDL_Event = std::mem::zeroed();
+            SDL_WaitEvent(&mut sdl_event);
+            match sdl_event.event_type {
+                SDL_QUIT => { event = Event::Quit},
+                _ => {
+                    for registered_event in &self.registered_events {
+                        if sdl_event.event_type == *registered_event {
+                            event = Event::CustomEvent(CustomEvent { event_id: sdl_event.event_type });
+                        }
+                    }
+                },
+            }
+        }
+        event
     }
 }
 
@@ -59,12 +84,12 @@ impl Drop for SdlInstance {
 }
 
 pub struct SdlWindow {
-    _sdl_instance: std::sync::Arc<std::sync::Mutex<SdlInstance>>,
+    _sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>,
     window: SDL_Window,
 }
 
 impl SdlWindow {
-    pub fn new(sdl_instance: std::sync::Arc<std::sync::Mutex<SdlInstance>>) -> SdlWindow {
+    pub fn new(sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>) -> SdlWindow {
         let window_title = std::ffi::CString::new("Window Application").expect("CString::new failed");
         let window = unsafe {
             SDL_CreateWindow(

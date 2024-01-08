@@ -1,93 +1,71 @@
-mod update_trigger;
+mod interval_trigger;
 
-/*struct EventDispatcher{}
+use std::{
+    sync::{Arc, Mutex},
+    thread::{self},
+    time::Duration, rc::Rc, ops::Deref, cell::RefCell,
+};
+
+use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow, Event};
+
+use crate::interval_trigger::IntervalTrigger;
+
+struct EventDispatcher {
+    sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>,
+}
 
 impl EventDispatcher {
-    fn new() -> EventDispatcher {
-        EventDispatcher {}
+    fn new(sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>) -> EventDispatcher {
+        EventDispatcher {
+            sdl_instance
+        }
     }
 
     fn run(&self) {
         'event_loop: loop {
-            let mut event: SDL_Event = unsafe { std::mem::zeroed() };
-
-            // Wait for an event
-            unsafe {
-                SDL_WaitEvent(&mut event);
-            }
-
-            // Handle the event
-            match event.event_type {
-                SDL_QUIT => {
-                    println!("SDL_QUIT event received, exiting...");
+            // TODO: this call locks the sdl_instance and then no trigger thread can spawn an event
+            let event = self.sdl_instance.borrow().wait_for_event();
+            println!("event: {:?}", event);
+            match event {
+                Event::Quit => {
                     break 'event_loop;
-                }
-                _ => {
-                    // Handle other events as needed
-                    println!("{:?}", event.event_type);
-                    if event.event_type == render_event_type {
-                        println!("render_event_type");
-                    } else if event.event_type == update_event_type {
-                        println!("update_event_type");
-                    }
-                }
+                },
+                _ => {}
             }
         }
     }
 }
 
-struct SdlInstance{}
-
-impl SdlInstance {
-    fn new(nr_custom_event_slots: u32) -> SdlInstance {
-        SdlInstance {}
-    }
-
-    fn aquire_event_type() ->
-}*/
-
-use std::{
-    sync::{mpsc::Sender, Arc, Mutex},
-    thread::{self, JoinHandle},
-    time::Duration,
-};
-
-use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow, CustomEvent};
-
-use crate::update_trigger::UpdateTrigger;
-
-
-
 fn main() {
-    println!("Hello, world!");
+    println!("Client v0.1.0");
 
-    let sdl_instance = Arc::new(Mutex::new(SdlInstance::new()));
-    //let sdl_instance = std::rc::Rc::new(SdlInstance::new());
-    let sdl_window = std::rc::Rc::new(SdlWindow::new(Arc::clone(&sdl_instance)));
-    let sdl_renderer = SdlRenderer::new(std::rc::Rc::clone(&sdl_window));
+    let sdl_instance = Rc::new(RefCell::new(SdlInstance::new()));
+    let sdl_window = Rc::new(SdlWindow::new(Rc::clone(&sdl_instance)));
+    let sdl_renderer = SdlRenderer::new(Rc::clone(&sdl_window));
 
-    let event_ids = sdl_instance.lock().unwrap().register_events(2);
+    let event_ids = sdl_instance.borrow_mut().register_events(2);
     println!("event_id: {}", event_ids[0]);
     println!("event_id: {}", event_ids[1]);
-    // todo: return array[2]
 
-    let mut update_trigger = UpdateTrigger::new(
-        Arc::clone(&sdl_instance),
+    let mut update_trigger = IntervalTrigger::new(
+        Rc::clone(&sdl_instance),
         Duration::from_millis(1000),
         event_ids[0],
     );
 
+    let mut render_trigger = IntervalTrigger::new(
+        Rc::clone(&sdl_instance),
+        Duration::from_millis(250),
+        event_ids[1],
+    );
+
+    let event_dispatcher = EventDispatcher::new(
+        Rc::clone(&sdl_instance),
+    );
+
     update_trigger.start();
-    thread::sleep(Duration::from_millis(4000));
+    render_trigger.start();
+    event_dispatcher.run();
+    render_trigger.end();
     update_trigger.end();
-
-    /*let render_event_type = unsafe { SDL_RegisterEvents(2) };
-    let update_event_type = render_event_type + 1;
-
-    let sdl_instance = SdlInstance::new(2);
-
-    let update_trigger = UpdateTrigger::new();
-    let event_dispatcher = EventDispatcher::new();
-
-    event_dispatcher.run();*/
 }
