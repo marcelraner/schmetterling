@@ -1,4 +1,10 @@
-use sdl2_ffi::{SDL_Quit, SDL_Init, SDL_INIT_VIDEO, SDL_CreateWindow, SDL_DestroyWindow, SDL_Window, SDL_WINDOW_SHOWN, SDL_WINDOW_RESIZABLE, SDL_CreateRenderer, SDL_DestroyRenderer, SDL_Renderer, SDL_RegisterEvents, SDL_PushEvent, SDL_Event, SDL_WaitEvent, SDL_QUIT};
+use sdl2_ffi::{
+    SDL_CreateRenderer, SDL_CreateWindow, SDL_DestroyRenderer, SDL_DestroyWindow, SDL_Event,
+    SDL_Init, SDL_PollEvent, SDL_PushEvent, SDL_Quit, SDL_RegisterEvents, SDL_RenderClear,
+    SDL_RenderPresent, SDL_Renderer, SDL_SetRenderDrawColor, SDL_WaitEvent, SDL_Window,
+    SDL_INIT_VIDEO, SDL_QUIT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_UNDEFINED,
+    SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN,
+};
 
 #[derive(Debug)]
 pub enum Event {
@@ -21,7 +27,7 @@ pub fn sdl2_get_error() -> String {
 }
 
 pub struct SdlInstance {
-    registered_events: Vec<u32>
+    registered_events: Vec<u32>,
 }
 
 impl SdlInstance {
@@ -37,9 +43,7 @@ impl SdlInstance {
     }
 
     pub fn register_events(&mut self, number_of_events: u32) -> Vec<u32> {
-        let first_event_id = unsafe {
-            SDL_RegisterEvents(number_of_events as i32)
-        };
+        let first_event_id = unsafe { SDL_RegisterEvents(number_of_events as i32) };
         for i in 0..number_of_events {
             self.registered_events.push(first_event_id + i);
         }
@@ -50,7 +54,7 @@ impl SdlInstance {
     pub fn push_custom_event(event: CustomEvent) {
         let mut sdl_event: SDL_Event = unsafe { std::mem::zeroed() };
         sdl_event.event_type = event.event_id;
-        unsafe {    
+        unsafe {
             SDL_PushEvent(&sdl_event as *const SDL_Event);
         }
     }
@@ -61,14 +65,16 @@ impl SdlInstance {
             let mut sdl_event: SDL_Event = std::mem::zeroed();
             SDL_WaitEvent(&mut sdl_event);
             match sdl_event.event_type {
-                SDL_QUIT => { event = Event::Quit},
+                SDL_QUIT => event = Event::Quit,
                 _ => {
                     for registered_event in &self.registered_events {
                         if sdl_event.event_type == *registered_event {
-                            event = Event::CustomEvent(CustomEvent { event_id: sdl_event.event_type });
+                            event = Event::CustomEvent(CustomEvent {
+                                event_id: sdl_event.event_type,
+                            });
                         }
                     }
-                },
+                }
             }
         }
         event
@@ -90,12 +96,13 @@ pub struct SdlWindow {
 
 impl SdlWindow {
     pub fn new(sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>) -> SdlWindow {
-        let window_title = std::ffi::CString::new("Window Application").expect("CString::new failed");
+        let window_title =
+            std::ffi::CString::new("Window Application").expect("CString::new failed");
         let window = unsafe {
             SDL_CreateWindow(
                 window_title.as_ptr(),
-                0,
-                0,
+                SDL_WINDOWPOS_CENTERED as i32,
+                SDL_WINDOWPOS_CENTERED as i32,
                 640,
                 480,
                 SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
@@ -133,6 +140,24 @@ impl SdlRenderer {
         SdlRenderer {
             _sdl_window: sdl_window,
             renderer,
+        }
+    }
+
+    pub fn set_draw_color(&self, r: u8, g: u8, b: u8, a: u8) {
+        unsafe {
+            SDL_SetRenderDrawColor(self.renderer, r, g, b, a);
+        }
+    }
+
+    pub fn clear(&self) {
+        unsafe {
+            SDL_RenderClear(self.renderer);
+        }
+    }
+
+    pub fn present(&self) {
+        unsafe {
+            SDL_RenderPresent(self.renderer);
         }
     }
 }

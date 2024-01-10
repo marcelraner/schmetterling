@@ -1,39 +1,36 @@
 mod interval_trigger;
+mod event_dispatcher;
 
 use std::{
-    sync::{Arc, Mutex},
-    thread::{self},
-    time::Duration, rc::Rc, ops::Deref, cell::RefCell,
+    time::Duration, rc::Rc, cell::RefCell,
 };
 
-use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow, Event};
+use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow};
 
 use crate::interval_trigger::IntervalTrigger;
+use crate::event_dispatcher::EventDispatcher;
 
-struct EventDispatcher {
-    sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>,
+struct Renderer {
+    sdl_renderer: std::rc::Rc<SdlRenderer>,
 }
 
-impl EventDispatcher {
-    fn new(sdl_instance: std::rc::Rc<std::cell::RefCell<SdlInstance>>) -> EventDispatcher {
-        EventDispatcher {
-            sdl_instance
+impl Renderer {
+    pub fn new(sdl_renderer: std::rc::Rc<SdlRenderer>) -> Self {
+        Renderer {
+            sdl_renderer,
         }
     }
 
-    fn run(&self) {
-        'event_loop: loop {
-            // TODO: this call locks the sdl_instance and then no trigger thread can spawn an event
-            let event = self.sdl_instance.borrow().wait_for_event();
-            println!("event: {:?}", event);
-            match event {
-                Event::Quit => {
-                    break 'event_loop;
-                },
-                _ => {}
-            }
-        }
+    pub fn on_render(&self) {
+        println!("on_render()");
+        self.sdl_renderer.set_draw_color(111, 0, 0, 0);
+        self.sdl_renderer.clear();
+        self.sdl_renderer.present();
     }
+}
+
+fn on_update() {
+    println!("on_update()");
 }
 
 fn main() {
@@ -41,27 +38,36 @@ fn main() {
 
     let sdl_instance = Rc::new(RefCell::new(SdlInstance::new()));
     let sdl_window = Rc::new(SdlWindow::new(Rc::clone(&sdl_instance)));
-    let sdl_renderer = SdlRenderer::new(Rc::clone(&sdl_window));
+    let sdl_renderer = Rc::new(SdlRenderer::new(Rc::clone(&sdl_window)));
 
     let event_ids = sdl_instance.borrow_mut().register_events(2);
-    println!("event_id: {}", event_ids[0]);
-    println!("event_id: {}", event_ids[1]);
+    let update_event_id = event_ids[0];
+    let render_event_id = event_ids[1];
 
     let mut update_trigger = IntervalTrigger::new(
         Rc::clone(&sdl_instance),
         Duration::from_millis(1000),
-        event_ids[0],
+        update_event_id,
     );
 
     let mut render_trigger = IntervalTrigger::new(
         Rc::clone(&sdl_instance),
         Duration::from_millis(250),
-        event_ids[1],
+        render_event_id,
     );
 
-    let event_dispatcher = EventDispatcher::new(
+    let mut event_dispatcher = EventDispatcher::new(
         Rc::clone(&sdl_instance),
     );
+
+    let renderer = Renderer::new(Rc::clone(&sdl_renderer));
+
+    let on_render_closure = move || {
+        renderer.on_render();
+    };
+
+    event_dispatcher.register_event_callback(update_event_id, on_update);
+    event_dispatcher.register_event_callback(render_event_id, on_render_closure);
 
     update_trigger.start();
     render_trigger.start();
