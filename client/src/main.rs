@@ -1,37 +1,15 @@
-mod interval_trigger;
 mod event_dispatcher;
+mod interval_trigger;
+mod renderer;
+mod updater;
+mod game_state;
 
-use std::{
-    time::Duration, rc::Rc, cell::RefCell,
-};
-
-use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow};
-
+use crate::{event_dispatcher::EventDispatcher, game_state::GameState};
 use crate::interval_trigger::IntervalTrigger;
-use crate::event_dispatcher::EventDispatcher;
-
-struct Renderer {
-    sdl_renderer: std::rc::Rc<SdlRenderer>,
-}
-
-impl Renderer {
-    pub fn new(sdl_renderer: std::rc::Rc<SdlRenderer>) -> Self {
-        Renderer {
-            sdl_renderer,
-        }
-    }
-
-    pub fn on_render(&self) {
-        println!("on_render()");
-        self.sdl_renderer.set_draw_color(111, 0, 0, 0);
-        self.sdl_renderer.clear();
-        self.sdl_renderer.present();
-    }
-}
-
-fn on_update() {
-    println!("on_update()");
-}
+use crate::renderer::Renderer;
+use crate::updater::Updater;
+use sdl2_wrapper::{SdlInstance, SdlRenderer, SdlWindow};
+use std::{cell::RefCell, rc::Rc, time::Duration};
 
 fn main() {
     println!("Client v0.1.0");
@@ -56,17 +34,23 @@ fn main() {
         render_event_id,
     );
 
-    let mut event_dispatcher = EventDispatcher::new(
-        Rc::clone(&sdl_instance),
-    );
+    let mut event_dispatcher = EventDispatcher::new(Rc::clone(&sdl_instance));
 
-    let renderer = Renderer::new(Rc::clone(&sdl_renderer));
+    let game_state = Rc::new(RefCell::new(GameState::new()));
+
+    let renderer = Renderer::new(Rc::clone(&sdl_renderer), Rc::clone(&game_state));
 
     let on_render_closure = move || {
-        renderer.on_render();
+        renderer.render();
     };
 
-    event_dispatcher.register_event_callback(update_event_id, on_update);
+    let updater = Updater::new(Rc::clone(&game_state));
+
+    let on_update_closure = move || {
+        updater.update();
+    };
+
+    event_dispatcher.register_event_callback(update_event_id, on_update_closure);
     event_dispatcher.register_event_callback(render_event_id, on_render_closure);
 
     update_trigger.start();

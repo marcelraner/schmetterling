@@ -26,7 +26,7 @@ impl EventDispatcher {
     pub fn run(&self) {
         'event_loop: loop {
             let event = self.sdl_instance.borrow().wait_for_event();
-            println!("event: {:?}", event);
+            //println!("event: {:?}", event);
             match event {
                 Event::Quit => {
                     break 'event_loop;

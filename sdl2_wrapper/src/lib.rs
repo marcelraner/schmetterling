@@ -3,7 +3,7 @@ use sdl2_ffi::{
     SDL_Init, SDL_PollEvent, SDL_PushEvent, SDL_Quit, SDL_RegisterEvents, SDL_RenderClear,
     SDL_RenderPresent, SDL_Renderer, SDL_SetRenderDrawColor, SDL_WaitEvent, SDL_Window,
     SDL_INIT_VIDEO, SDL_QUIT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN,
+    SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN, SDL_Rect, SDL_RenderDrawRect,
 };
 
 #[derive(Debug)]
@@ -159,6 +159,11 @@ impl SdlRenderer {
         unsafe {
             SDL_RenderPresent(self.renderer);
         }
+    }
+
+    pub fn draw_rectangle(&self, x: i32, y: i32, w: i32, h: i32) {
+        let rect = SDL_Rect { x, y, w, h };
+        unsafe { SDL_RenderDrawRect(self.renderer, &rect); }
     }
 }
 
