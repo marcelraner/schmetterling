@@ -13,7 +13,7 @@ impl Updater {
 
     pub fn update(&self) {
         //println!("update()");
-        self.game_state.borrow_mut().dummy.0 += 1;
-        self.game_state.borrow_mut().dummy.1 += 1;
+        self.game_state.borrow_mut().player.camera_position.x += 1;
+        self.game_state.borrow_mut().player.camera_position.y += 1;
     }
 }

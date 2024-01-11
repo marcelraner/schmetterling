@@ -102,4 +102,9 @@ extern "C" {
         renderer: SDL_Renderer,
         rect: *const SDL_Rect,
     ) -> i32;
+    pub fn SDL_GetRendererOutputSize(
+        renderer: SDL_Renderer,
+        w: *mut i32,
+        h: *mut i32,
+    ) -> i32;
 }

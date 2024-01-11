@@ -3,7 +3,7 @@ use sdl2_ffi::{
     SDL_Init, SDL_PollEvent, SDL_PushEvent, SDL_Quit, SDL_RegisterEvents, SDL_RenderClear,
     SDL_RenderPresent, SDL_Renderer, SDL_SetRenderDrawColor, SDL_WaitEvent, SDL_Window,
     SDL_INIT_VIDEO, SDL_QUIT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_UNDEFINED,
-    SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN, SDL_Rect, SDL_RenderDrawRect,
+    SDL_WINDOW_RESIZABLE, SDL_WINDOW_SHOWN, SDL_Rect, SDL_RenderDrawRect, SDL_GetRendererOutputSize,
 };
 
 #[derive(Debug)]
@@ -141,6 +141,15 @@ impl SdlRenderer {
             _sdl_window: sdl_window,
             renderer,
         }
+    }
+
+    pub fn get_renderer_size(&self) -> (i32, i32) {
+        let mut w: i32 = 0;
+        let mut h: i32 = 0;
+        unsafe {
+            SDL_GetRendererOutputSize(self.renderer, &mut w, &mut h);
+        }
+        (w, h)
     }
 
     pub fn set_draw_color(&self, r: u8, g: u8, b: u8, a: u8) {
